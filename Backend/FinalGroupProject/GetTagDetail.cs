@@ -14,6 +14,7 @@ using GenericLibrary.Model;
 
 namespace FinalGroupProject
 {
+
     public class GetTagDetail
     {
         private ISqlRepository _sqlRepository;
