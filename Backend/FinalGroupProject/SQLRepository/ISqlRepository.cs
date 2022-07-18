@@ -13,6 +13,8 @@ namespace FinalGroupProject.SQLRepository
         List<Tag> GetTagDetails();
         List<LabelCount> GetLabelCount();
 
+        List<CommentTag> GetComments();
+
         void PostTagDetail(Tag tag);
         void PostCommentDetailsFromCSV();
         void PostCommentDetails(List<Comment> comments);

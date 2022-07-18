@@ -90,7 +90,47 @@ namespace FinalGroupProject.SQLRepository
                 throw ex;
             }
         }
-        
+
+        public List<CommentTag> GetComments()
+        {
+            List<CommentTag> comments = new List<CommentTag>();
+            try
+            {
+                string query = @"Select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id and comment.name like '%%' and comment.city like '%%' and comment.user_comment like '%%' left join tag on tag.id = commentTag_mapping.tag_id and tag.label like '%%'  order by comment.comment_date desc;";
+
+                DatabaseConnection.Open();
+
+                using (SqlCommand sqlCommand = new SqlCommand(query))
+                {
+                    sqlCommand.Connection = DatabaseConnection.SqlConnectionToDb;
+
+                    SqlDataReader readAllInfo = sqlCommand.ExecuteReader();
+
+                    while (readAllInfo.Read())
+                    {
+                        CommentTag comment = new CommentTag();
+
+                        comment.Id = (int)readAllInfo["id"];
+                        comment.Name = (string)readAllInfo["name"];
+                        comment.Date = (DateTime)readAllInfo["comment_date"];
+                        comment.City = (string)readAllInfo["city"];
+                        comment.UserComment = (string)readAllInfo["user_comment"];
+                        comment.Label = (string)readAllInfo["label"];
+
+                        comments.Add(comment);
+                    }
+                    readAllInfo.Close();
+                }
+                DatabaseConnection.Close();
+                return comments;
+            }
+            catch (Exception ex)
+            {
+                DatabaseConnection.Close();
+                throw ex;
+            }
+        }
+
         public void PostTagDetail(Tag tag)
         {
             DatabaseConnection.Open();
