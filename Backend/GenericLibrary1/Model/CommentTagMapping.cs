@@ -10,6 +10,6 @@ namespace GenericLibrary.Model
     {
         public int Id { get; set; }
         public int CommentId { get; set; }
-        public bool TagId { get; set; }
+        public int TagId { get; set; }
     }
 }
