@@ -92,12 +92,23 @@ namespace FinalGroupProject.SQLRepository
             }
         }
 
-        public List<CommentTag> GetComments()
+        public List<CommentTag> GetComments(string orderBy, string checkBox, string userComment, string name, string city, string label)
         {
             List<CommentTag> comments = new List<CommentTag>();
             try
             {
-                string query = @"Select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id and comment.name like '%%' and comment.city like '%%' and comment.user_comment like '%%' left join tag on tag.id = commentTag_mapping.tag_id and tag.label like '%%'  order by comment.comment_date desc";
+                string query;
+
+                if (checkBox == "true")
+                {
+                    query = $"Select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id and comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%' left join tag on tag.id = commentTag_mapping.tag_id order by comment.comment_date {orderBy}";
+                }
+                else
+                {
+                    query = $"Select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id and comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%' left join tag on tag.id = commentTag_mapping.tag_id and tag.label like '%{label}%'  order by comment.comment_date {orderBy}";
+
+                    //query = "select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.comment_id where comment.name like '%%' and comment.comment_date like '%%' and comment.city like '%%' and comment.user_comment like '%%' and tag.label like '%%' order by comment.comment_date desc";
+                }
 
                 DatabaseConnection.Open();
 
@@ -116,7 +127,15 @@ namespace FinalGroupProject.SQLRepository
                         comment.Date = (DateTime)readAllInfo["comment_date"];
                         comment.City = (string)readAllInfo["city"];
                         comment.UserComment = (string)readAllInfo["user_comment"];
-                        comment.Label = (string)readAllInfo["label"];
+                        if(string.IsNullOrEmpty(readAllInfo["label"].ToString()))
+                        {
+                            comment.Label = "";
+                        }
+                        else
+                        {
+                            comment.Label = (string)readAllInfo["label"];
+                        }
+                        
 
                         comments.Add(comment);
                     }
