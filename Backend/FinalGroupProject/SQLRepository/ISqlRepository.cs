@@ -13,12 +13,14 @@ namespace FinalGroupProject.SQLRepository
         List<Tag> GetTagDetails();
         List<LabelCount> GetLabelCount();
 
-        List<CommentTag> GetComments();
+        List<CommentTag> GetComments(string orderBy,string checkBox,string comment,string name,string city,string label);
 
         void PostTagDetail(Tag tag);
         void PostCommentDetailsFromCSV();
         void PostCommentDetails(List<Comment> comments);
         void PostCommentTagMapping(CommentTagMapping commentTag);
+
+        //void Filter();
 
     }
 }
