@@ -14,18 +14,18 @@ using GenericLibrary.Model;
 
 namespace FinalGroupProject
 {
-    public class PostTagDetail
+    public class PostCommentTagMapping
     {
         private ISqlRepository _sqlRepository;
 
-        public PostTagDetail(ISqlRepository sqlRepository, ISqlDbConnection databaseConnection)
+        public PostCommentTagMapping(ISqlRepository sqlRepository, ISqlDbConnection databaseConnection)
         {
             _sqlRepository = sqlRepository;
             _sqlRepository.DatabaseConnection = databaseConnection;
         }
-        [FunctionName("PostTagDetail")]
+        [FunctionName("PostCommentTagMapping")]
         public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "tag")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "comment-tag")] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
@@ -39,11 +39,11 @@ namespace FinalGroupProject
                     return new StatusCodeResult(StatusCodes.Status400BadRequest);
                 }
 
-                Tag tag = JsonConvert.DeserializeObject<Tag>(requestBody);
+                CommentTagMapping commentTag = JsonConvert.DeserializeObject<CommentTagMapping>(requestBody);
 
-                _sqlRepository.PostTagDetail(tag);
+                _sqlRepository.PostCommentTagMapping(commentTag);
 
-                return new StatusCodeResult(StatusCodes.Status201Created); 
+                return new StatusCodeResult(StatusCodes.Status201Created);
             }
             catch (Exception ex)
             {

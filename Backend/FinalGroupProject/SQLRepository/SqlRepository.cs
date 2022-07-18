@@ -16,6 +16,7 @@ namespace FinalGroupProject.SQLRepository
     {
         public ISqlDbConnection DatabaseConnection { get; set; }
 
+
         public List<Tag> GetTagDetails()
         {
             List<Tag> tags = new List<Tag>();
@@ -53,7 +54,44 @@ namespace FinalGroupProject.SQLRepository
             }
         }
 
-        public void PostTagDetails(List<Tag> tags)
+        public List<LabelCount> GetLabelCount()
+        {
+            List<LabelCount> labelCounts = new List<LabelCount>();
+            try
+            {
+                string query = @"select tag.label,COUNT(*)as labelCount from commentTag_mapping inner join tag on tag.id = commentTag_mapping.tag_id group by tag.label";
+
+                DatabaseConnection.Open();
+
+                using (SqlCommand sqlCommand = new SqlCommand(query))
+                {
+                    sqlCommand.Connection = DatabaseConnection.SqlConnectionToDb;
+
+                    SqlDataReader readAllInfo = sqlCommand.ExecuteReader();
+
+                    while (readAllInfo.Read())
+                    {
+                        LabelCount labelCount = new LabelCount();
+
+                        //labelCount.Id = (int)readAllInfo["id"];
+                        labelCount.Label = (string)readAllInfo["label"];
+                        labelCount.Count = (int)readAllInfo["labelCount"];
+
+                        labelCounts.Add(labelCount);
+                    }
+                    readAllInfo.Close();
+                }
+                DatabaseConnection.Close();
+                return labelCounts;
+            }
+            catch (Exception ex)
+            {
+                DatabaseConnection.Close();
+                throw ex;
+            }
+        }
+        
+        public void PostTagDetail(Tag tag)
         {
             DatabaseConnection.Open();
             SqlTransaction sqlTransaction = DatabaseConnection.SqlConnectionToDb.BeginTransaction();
@@ -71,13 +109,12 @@ namespace FinalGroupProject.SQLRepository
                     sqlCommand.Parameters.Add(new SqlParameter("@Label", SqlDbType.NVarChar));
                     sqlCommand.Parameters.Add(new SqlParameter("@Color", SqlDbType.NVarChar));
 
-                    foreach (Tag tag in tags)
-                    {
-                        sqlCommand.Parameters["@Label"].Value = tag.Label;
-                        sqlCommand.Parameters["@Color"].Value = tag.Color;
+                    
+                    sqlCommand.Parameters["@Label"].Value = tag.Label;
+                    sqlCommand.Parameters["@Color"].Value = tag.Color;
 
-                        sqlCommand.ExecuteNonQuery();
-                    }
+                    sqlCommand.ExecuteNonQuery();
+                   
                     sqlTransaction.Commit();
                 }
                 DatabaseConnection.Close();
@@ -91,6 +128,31 @@ namespace FinalGroupProject.SQLRepository
             }
         }
 
+        public void PostCommentDetailsFromCSV()
+        {
+            string json;
+            using (StreamReader reader = new StreamReader(@"C:\DummyDir\FinalGroupProjectData.csv"))
+            {
+                using (CsvReader csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+                {
+                    using (CsvDataReader csvDataReader = new CsvDataReader(csv))
+                    {
+                        DataTable dataTable = new DataTable();
+                        dataTable.Columns.Add("Name", typeof(string));
+                        dataTable.Columns.Add("Date", typeof(DateTime));
+                        dataTable.Columns.Add("City", typeof(string));
+                        dataTable.Columns.Add("UserComment", typeof(string));
+
+                        dataTable.Load(csvDataReader);
+                        json = JsonConvert.SerializeObject(dataTable);
+                    }
+                }
+            }
+            List<Comment> comments = JsonConvert.DeserializeObject<List<Comment>>(json);
+
+            PostCommentDetails(comments);
+        }
+        
         public void PostCommentDetails(List<Comment> comments)
         {
             DatabaseConnection.Open();
@@ -132,65 +194,40 @@ namespace FinalGroupProject.SQLRepository
                 throw ex;
             }
         }
-        
-        public void PostCommentDetailsFromCSV()
+
+        public void PostCommentTagMapping(CommentTagMapping commentTag)
         {
-            string json;
-            using (StreamReader reader = new StreamReader(@"C:\DummyDir\FinalGroupProjectData.csv"))
-            {
-                using (CsvReader csv = new CsvReader(reader, CultureInfo.InvariantCulture))
-                {
-                    using (CsvDataReader csvDataReader = new CsvDataReader(csv))
-                    {
-                        DataTable dataTable = new DataTable();
-                        dataTable.Columns.Add("Name", typeof(string));
-                        dataTable.Columns.Add("Date", typeof(DateTime));
-                        dataTable.Columns.Add("City", typeof(string));
-                        dataTable.Columns.Add("UserComment", typeof(string));
-
-                        dataTable.Load(csvDataReader);
-                        json = JsonConvert.SerializeObject(dataTable);
-                    }
-                }
-            }
-            List<Comment> comments = JsonConvert.DeserializeObject<List<Comment>>(json);
-
-            PostCommentDetails(comments);
-        }
-
-        public List<LabelCount> GetLabelCount()
-        {
-            List<LabelCount> labelCounts = new List<LabelCount>();
+            DatabaseConnection.Open();
+            SqlTransaction sqlTransaction = DatabaseConnection.SqlConnectionToDb.BeginTransaction();
             try
             {
-                string query = @"select tag.label,COUNT(*)as labelCount from commentTag_mapping inner join tag on tag.id = commentTag_mapping.tag_id group by tag.label";
-
-                DatabaseConnection.Open();
-
-                using (SqlCommand sqlCommand = new SqlCommand(query))
+                using (SqlCommand sqlCommand = new SqlCommand())
                 {
+                    sqlCommand.Transaction = sqlTransaction;
+
                     sqlCommand.Connection = DatabaseConnection.SqlConnectionToDb;
 
-                    SqlDataReader readAllInfo = sqlCommand.ExecuteReader();
+                    sqlCommand.CommandText = string.Empty;
+                    sqlCommand.CommandText = "insert into commentTag_mapping (comment_id,tag_id) values(@commentId,@tagId)";
 
-                    while (readAllInfo.Read())
-                    {
-                        LabelCount labelCount = new LabelCount();
+                    sqlCommand.Parameters.Add(new SqlParameter("@commentId", SqlDbType.Int));
+                    sqlCommand.Parameters.Add(new SqlParameter("@tagId", SqlDbType.Int));
 
-                        //labelCount.Id = (int)readAllInfo["id"];
-                        labelCount.Label = (string)readAllInfo["label"];
-                        labelCount.Count = (int)readAllInfo["labelCount"];
 
-                        labelCounts.Add(labelCount);
-                    }
-                    readAllInfo.Close();
+                    sqlCommand.Parameters["@commentId"].Value = commentTag.CommentId;
+                    sqlCommand.Parameters["@tagId"].Value = commentTag.TagId;
+
+                    sqlCommand.ExecuteNonQuery();
+
+                    sqlTransaction.Commit();
                 }
                 DatabaseConnection.Close();
-                return labelCounts;
             }
+
             catch (Exception ex)
             {
                 DatabaseConnection.Close();
+                sqlTransaction.Rollback();
                 throw ex;
             }
         }

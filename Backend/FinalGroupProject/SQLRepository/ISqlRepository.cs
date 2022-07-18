@@ -11,13 +11,12 @@ namespace FinalGroupProject.SQLRepository
         ISqlDbConnection DatabaseConnection { get; set; }
 
         List<Tag> GetTagDetails();
-
-        void PostTagDetails(List<Tag> tags);
-
-        void PostCommentDetails(List<Comment> comments);
-
-        void PostCommentDetailsFromCSV();
-
         List<LabelCount> GetLabelCount();
+
+        void PostTagDetail(Tag tag);
+        void PostCommentDetailsFromCSV();
+        void PostCommentDetails(List<Comment> comments);
+        void PostCommentTagMapping(CommentTagMapping commentTag);
+
     }
 }
