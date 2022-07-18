@@ -59,7 +59,7 @@ namespace FinalGroupProject.SQLRepository
             List<LabelCount> labelCounts = new List<LabelCount>();
             try
             {
-                string query = @"select tag.label,COUNT(*)as labelCount from commentTag_mapping inner join tag on tag.id = commentTag_mapping.tag_id group by tag.label";
+                string query = @"select tag.id,tag.label,tag.color,COUNT(*)as labelCount from commentTag_mapping inner join tag on tag.id = commentTag_mapping.tag_id group by tag.id,tag.label,tag.color";
 
                 DatabaseConnection.Open();
 
@@ -73,8 +73,9 @@ namespace FinalGroupProject.SQLRepository
                     {
                         LabelCount labelCount = new LabelCount();
 
-                        //labelCount.Id = (int)readAllInfo["id"];
+                        labelCount.Id = (int)readAllInfo["id"];
                         labelCount.Label = (string)readAllInfo["label"];
+                        labelCount.Color = (string)readAllInfo["color"];
                         labelCount.Count = (int)readAllInfo["labelCount"];
 
                         labelCounts.Add(labelCount);
@@ -96,7 +97,7 @@ namespace FinalGroupProject.SQLRepository
             List<CommentTag> comments = new List<CommentTag>();
             try
             {
-                string query = @"Select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id and comment.name like '%%' and comment.city like '%%' and comment.user_comment like '%%' left join tag on tag.id = commentTag_mapping.tag_id and tag.label like '%%'  order by comment.comment_date desc;";
+                string query = @"Select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id and comment.name like '%%' and comment.city like '%%' and comment.user_comment like '%%' left join tag on tag.id = commentTag_mapping.tag_id and tag.label like '%%'  order by comment.comment_date desc";
 
                 DatabaseConnection.Open();
 
