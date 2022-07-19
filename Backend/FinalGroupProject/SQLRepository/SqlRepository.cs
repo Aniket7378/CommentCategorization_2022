@@ -101,15 +101,16 @@ namespace FinalGroupProject.SQLRepository
 
                 if (checkBox == "true")
                 {
-                    query = $"Select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id and comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%' left join tag on tag.id = commentTag_mapping.tag_id order by comment.comment_date {orderBy}";
+                    query = $"select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.tag_id where comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%' and tag.label is null order by comment.comment_date {orderBy}";
+                }
+                else if (label == "")
+                {
+                    query = $"select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.tag_id where comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%' order by comment.comment_date {orderBy}";
                 }
                 else
                 {
-                    query = $"Select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id and comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%' left join tag on tag.id = commentTag_mapping.tag_id and tag.label like '%{label}%'  order by comment.comment_date {orderBy}";
-
-                    //query = "select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.comment_id where comment.name like '%%' and comment.comment_date like '%%' and comment.city like '%%' and comment.user_comment like '%%' and tag.label like '%%' order by comment.comment_date desc";
+                    query = $"select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.tag_id where comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%' and tag.label like '%{label}%' order by comment.comment_date {orderBy}";
                 }
-
                 DatabaseConnection.Open();
 
                 using (SqlCommand sqlCommand = new SqlCommand(query))
