@@ -33,7 +33,9 @@ namespace FinalGroupProject
 
             try
             {
-                string orderBy = "", checkBox = "", comment = "", name = "", city = "", label = "";
+                string orderBy = "", checkBox = "", comment = "", name = "", city = "", label = "",tempLabel = "";
+                int count = 0;
+
                 if (req.Query.ContainsKey("order"))
                 {
                     orderBy = req.Query["order"];
@@ -56,12 +58,26 @@ namespace FinalGroupProject
                 }
                 if (req.Query.ContainsKey("label"))
                 {
-                    label = req.Query["label"];
+                    tempLabel = req.Query["label"];
+                    string[] labels = tempLabel.Split(',');
+
+                    for (int labelCount = 0; labelCount < labels.Length; labelCount++)
+                    {
+                        if(labelCount == labels.Length - 1)
+                        {
+                            label = label + $"'{labels[labelCount]}'";
+                        }
+                        else
+                        {
+                            label = label + $"'{labels[labelCount]}',";
+                        }
+                    }
+                    count = labels.Length;
                 }
 
 
 
-                List<CommentTag> comments = _sqlRepository.GetComments(orderBy, checkBox, comment, name, city, label);
+                List<CommentTag> comments = _sqlRepository.GetComments(orderBy, checkBox, comment, name, city, label,count);
 
                 if (comments == null)
                 {
