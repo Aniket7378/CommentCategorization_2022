@@ -92,7 +92,7 @@ namespace FinalGroupProject.SQLRepository
             }
         }
 
-        public List<CommentTag> GetComments(string orderBy, string checkBox, string userComment, string name, string city, string label)
+        public List<CommentTag> GetComments(string orderBy, string checkBox, string userComment, string name, string city, string label,int count)
         {
             List<CommentTag> comments = new List<CommentTag>();
             try
@@ -109,7 +109,7 @@ namespace FinalGroupProject.SQLRepository
                 }
                 else
                 {
-                    query = $"select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.tag_id where comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%' and tag.label like '%{label}%' order by comment.comment_date {orderBy}";
+                    query = $"select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,count(tag.label) as label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.tag_id where comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%' and tag.label in ({label}) group by comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment having COUNT(distinct tag.label) = {count} order by comment.comment_date {orderBy}";
                 }
                 DatabaseConnection.Open();
 
@@ -128,13 +128,14 @@ namespace FinalGroupProject.SQLRepository
                         comment.Date = (DateTime)readAllInfo["comment_date"];
                         comment.City = (string)readAllInfo["city"];
                         comment.UserComment = (string)readAllInfo["user_comment"];
-                        if(string.IsNullOrEmpty(readAllInfo["label"].ToString()))
+                       
+                        if (string.IsNullOrEmpty(readAllInfo["label"].ToString()))
                         {
                             comment.Label = "";
                         }
                         else
                         {
-                            comment.Label = (string)readAllInfo["label"];
+                            comment.Label = label;
                         }
                         
 
