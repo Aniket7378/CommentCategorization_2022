@@ -10,7 +10,7 @@ namespace GenericLibrary.Database
 {
     public class SqlDbConnection : ISqlDbConnection
     {
-        private string _sqlConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Initial Catalog=CommentDB;Integrated Security=SSPI;";
+        private string _sqlConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Initial Catalog=CommentDB;Integrated Security=SSPI;MultipleActiveResultSets=true;";
         public SqlConnection SqlConnectionToDb { get; set; }
 
         public SqlDbConnection()

@@ -33,7 +33,7 @@ namespace FinalGroupProject
 
             try
             {
-                string orderBy = "", checkBox = "", comment = "", name = "", city = "", label = "",tempLabel = "";
+                string orderBy = "", checkBox = "", comment = "", name = "", city = "", label = "",tempLabel = "",skip = "", top = "";
                 int count = 0;
 
                 if (req.Query.ContainsKey("order"))
@@ -74,10 +74,16 @@ namespace FinalGroupProject
                     }
                     count = labels.Length;
                 }
+                if (req.Query.ContainsKey("skip"))
+                {
+                    skip = req.Query["skip"];
+                }
+                if (req.Query.ContainsKey("top"))
+                {
+                    top = req.Query["top"];
+                }
 
-
-
-                List<CommentTag> comments = _sqlRepository.GetComments(orderBy, checkBox, comment, name, city, label,count);
+                List<CommentTag> comments = _sqlRepository.GetComments(orderBy, checkBox, comment, name, city, label,count,skip,top);
 
                 if (comments == null)
                 {

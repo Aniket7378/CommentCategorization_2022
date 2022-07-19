@@ -92,24 +92,54 @@ namespace FinalGroupProject.SQLRepository
             }
         }
 
-        public List<CommentTag> GetComments(string orderBy, string checkBox, string userComment, string name, string city, string label,int count)
+        public List<int> SubQuery(int id)
+        {
+            try
+            {
+                string subQuery = $"select tag_id from commentTag_mapping where comment_id = '{id}'";
+                List<int> tagId = new List<int>();
+                using (SqlCommand sqlCommand = new SqlCommand(subQuery))
+                {
+                    sqlCommand.Connection = DatabaseConnection.SqlConnectionToDb;
+                    SqlDataReader readInfo = sqlCommand.ExecuteReader();
+
+                    while (readInfo.Read())
+                    {
+                        int tag = (int)readInfo["tag_id"];
+
+                        tagId.Add(tag);
+                    }
+                }
+
+                return tagId;
+            }
+            catch (Exception ex)
+            {
+                DatabaseConnection.Close();
+                throw ex;
+            }
+        }
+        public List<CommentTag> GetComments(string orderBy, string checkBox, string userComment, string name, string city, string label,int count, string skip, string top)
         {
             List<CommentTag> comments = new List<CommentTag>();
             try
             {
-                string query;
+                int skipRow = Convert.ToInt32(skip) * Convert.ToInt32(top); 
+                string query = $"select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.id from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.tag_id where comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%'";
+
+                string order = $" order by comment.comment_date {orderBy} offset {skipRow} rows fetch next {top} rows only";
 
                 if (checkBox == "true")
                 {
-                    query = $"select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.tag_id where comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%' and tag.label is null order by comment.comment_date {orderBy}";
+                    query = query + $" and tag.id is null" + order;
                 }
                 else if (label == "")
                 {
-                    query = $"select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.tag_id where comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%' order by comment.comment_date {orderBy}";
+                    query = query + order;
                 }
                 else
                 {
-                    query = $"select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,count(tag.label) as label from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.tag_id where comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%' and tag.label in ({label}) group by comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment having COUNT(distinct tag.label) = {count} order by comment.comment_date {orderBy}";
+                    query = query + $" and tag.id in ({label}) group by comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.id" + order;
                 }
                 DatabaseConnection.Open();
 
@@ -119,25 +149,30 @@ namespace FinalGroupProject.SQLRepository
 
                     SqlDataReader readAllInfo = sqlCommand.ExecuteReader();
 
+                    int previous = 0;
+
                     while (readAllInfo.Read())
                     {
                         CommentTag comment = new CommentTag();
 
                         comment.Id = (int)readAllInfo["id"];
+                        if(comment.Id == previous)
+                        {
+                            continue;
+                        }
+                        previous = comment.Id;
                         comment.Name = (string)readAllInfo["name"];
                         comment.Date = (DateTime)readAllInfo["comment_date"];
                         comment.City = (string)readAllInfo["city"];
                         comment.UserComment = (string)readAllInfo["user_comment"];
-                       
-                        if (string.IsNullOrEmpty(readAllInfo["label"].ToString()))
-                        {
-                            comment.Label = "";
-                        }
-                        else
-                        {
-                            comment.Label = label;
-                        }
+
                         
+                        
+                        List<int> tagId = SubQuery(comment.Id);
+                        
+                        
+
+                        comment.TagId = tagId;
 
                         comments.Add(comment);
                     }
