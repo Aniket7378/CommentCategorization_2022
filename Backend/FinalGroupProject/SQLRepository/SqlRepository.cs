@@ -130,7 +130,7 @@ namespace FinalGroupProject.SQLRepository
                 DatabaseConnection.Open();
                 while (isTrue)
                 {
-                    int skipRow = (Convert.ToInt32(skip) * Convert.ToInt32(top)) + countForSkipRow;
+                    int skipRow = (Convert.ToInt32(skip) + countForSkipRow) * Convert.ToInt32(top);
 
 
                     string query = $"select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.id from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.tag_id where comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%'";
