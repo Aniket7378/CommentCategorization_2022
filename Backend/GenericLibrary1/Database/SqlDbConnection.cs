@@ -10,7 +10,7 @@ namespace GenericLibrary.Database
 {
     public class SqlDbConnection : ISqlDbConnection
     {
-        private string _sqlConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Initial Catalog=CommentDB;Integrated Security=SSPI;MultipleActiveResultSets=true;";
+        private string _sqlConnectionString = @"Server=tcp:kjdthvq9uh.database.windows.net,1433;Initial Catalog=CommentCategorization;Persist Security Info=False;User ID=rcazuresqladmin;Password=welcome2!Azure;MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
         public SqlConnection SqlConnectionToDb { get; set; }
 
         public SqlDbConnection()
