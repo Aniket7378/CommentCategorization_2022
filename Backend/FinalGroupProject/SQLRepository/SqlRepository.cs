@@ -124,60 +124,76 @@ namespace FinalGroupProject.SQLRepository
             List<CommentTag> comments = new List<CommentTag>();
             try
             {
-                int skipRow = Convert.ToInt32(skip) * Convert.ToInt32(top); 
-                string query = $"select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.id from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.tag_id where comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%'";
-
-                string order = $" order by comment.comment_date {orderBy} offset {skipRow} rows fetch next {top} rows only";
-
-                if (checkBox == "true")
-                {
-                    query = query + $" and tag.id is null" + order;
-                }
-                else if (label == "")
-                {
-                    query = query + order;
-                }
-                else
-                {
-                    query = query + $" and tag.id in ({label}) group by comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.id" + order;
-                }
+                bool isTrue = true;
+                int counter = Convert.ToInt32(top);
+                int countForSkipRow = 0;
                 DatabaseConnection.Open();
-
-                using (SqlCommand sqlCommand = new SqlCommand(query))
+                while (isTrue)
                 {
-                    sqlCommand.Connection = DatabaseConnection.SqlConnectionToDb;
+                    int skipRow = (Convert.ToInt32(skip) * Convert.ToInt32(top)) + countForSkipRow;
 
-                    SqlDataReader readAllInfo = sqlCommand.ExecuteReader();
 
-                    int previous = 0;
+                    string query = $"select comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.id from comment left join commentTag_mapping on comment.id = commentTag_mapping.comment_id left join tag on tag.id = commentTag_mapping.tag_id where comment.name like '%{name}%' and comment.city like '%{city}%' and comment.user_comment like '%{userComment}%'";
 
-                    while (readAllInfo.Read())
+                    string order = $" order by comment.comment_date {orderBy} offset {skipRow} rows fetch next {top} rows only";
+
+                    if (checkBox == "true")
                     {
-                        CommentTag comment = new CommentTag();
-
-                        comment.Id = (int)readAllInfo["id"];
-                        if(comment.Id == previous)
-                        {
-                            continue;
-                        }
-                        previous = comment.Id;
-                        comment.Name = (string)readAllInfo["name"];
-                        comment.Date = (DateTime)readAllInfo["comment_date"];
-                        comment.City = (string)readAllInfo["city"];
-                        comment.UserComment = (string)readAllInfo["user_comment"];
-
-                        
-                        
-                        List<int> tagId = SubQuery(comment.Id);
-                        
-                        
-
-                        comment.TagId = tagId;
-
-                        comments.Add(comment);
+                        query = query + $" and tag.id is null" + order;
                     }
-                    readAllInfo.Close();
+                    else if (label == "")
+                    {
+                        query = query + order;
+                    }
+                    else
+                    {
+                        query = query + $" and tag.id in ({label}) group by comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.id" + order;
+                    }
+                    
+
+                    using (SqlCommand sqlCommand = new SqlCommand(query))
+                    {
+                        sqlCommand.Connection = DatabaseConnection.SqlConnectionToDb;
+
+                        SqlDataReader readAllInfo = sqlCommand.ExecuteReader();
+
+                        int previous = 0;
+
+                        while (readAllInfo.Read() && counter > 0)
+                        {
+                            CommentTag comment = new CommentTag();
+
+                            comment.Id = (int)readAllInfo["id"];
+                            if (comment.Id == previous)
+                            {
+                                continue;
+                            }
+                            previous = comment.Id;
+                            comment.Name = (string)readAllInfo["name"];
+                            comment.Date = (DateTime)readAllInfo["comment_date"];
+                            comment.City = (string)readAllInfo["city"];
+                            comment.UserComment = (string)readAllInfo["user_comment"];
+
+
+
+                            List<int> tagId = SubQuery(comment.Id);
+
+
+
+                            comment.TagId = tagId;
+
+                            comments.Add(comment);
+                            counter--;
+                        }
+                        readAllInfo.Close();
+                    }
+                    if(counter <= 0)
+                    {
+                        isTrue = false;
+                    }
+                    countForSkipRow += 1;
                 }
+
                 DatabaseConnection.Close();
                 return comments;
             }
