@@ -11,6 +11,6 @@ namespace GenericLibrary.Model
         public DateTime Date { get; set; }
         public string City { get; set; }
         public string UserComment { get; set; }
-        public List<int> TagId { get; set; }
+        public List<Tag> Tag { get; set; }
     }
 }
