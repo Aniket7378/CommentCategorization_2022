@@ -17,43 +17,6 @@ namespace FinalGroupProject.SQLRepository
         public ISqlDbConnection DatabaseConnection { get; set; }
 
 
-        public List<Tag> GetTagDetails()
-        {
-            List<Tag> tags = new List<Tag>();
-            try
-            {
-                string query = @"select * from tag";
-
-                DatabaseConnection.Open();
-
-                using (SqlCommand sqlCommand = new SqlCommand(query))
-                {
-                    sqlCommand.Connection = DatabaseConnection.SqlConnectionToDb;
-
-                    SqlDataReader readAllInfo = sqlCommand.ExecuteReader();
-
-                    while (readAllInfo.Read())
-                    {
-                        Tag tag = new Tag();
-
-                        tag.Id = (int)readAllInfo["id"];
-                        tag.Label = (string)readAllInfo["label"];
-                        tag.Color = (string)readAllInfo["color"];
-
-                        tags.Add(tag);
-                    }
-                    readAllInfo.Close();
-                }
-                DatabaseConnection.Close();
-                return tags;
-            }
-            catch (Exception ex)
-            {
-                DatabaseConnection.Close();
-                throw ex;
-            }
-        }
-
         public List<LabelCount> GetLabelCount()
         {
             List<LabelCount> labelCounts = new List<LabelCount>();
@@ -92,12 +55,12 @@ namespace FinalGroupProject.SQLRepository
             }
         }
 
-        public List<int> SubQuery(int id)
+        public List<Tag> SubQuery(int id)
         {
             try
             {
-                string subQuery = $"select tag_id from commentTag_mapping where comment_id = '{id}'";
-                List<int> tagId = new List<int>();
+                string subQuery = $"select tag.id,tag.label,tag.color from commentTag_mapping left join tag on tag.id = commentTag_mapping.tag_id where comment_id = '{id}'";
+                List<Tag> tags = new List<Tag>();
                 using (SqlCommand sqlCommand = new SqlCommand(subQuery))
                 {
                     sqlCommand.Connection = DatabaseConnection.SqlConnectionToDb;
@@ -105,13 +68,17 @@ namespace FinalGroupProject.SQLRepository
 
                     while (readInfo.Read())
                     {
-                        int tag = (int)readInfo["tag_id"];
+                        Tag tag = new Tag();
 
-                        tagId.Add(tag);
+                        tag.Id = (int)readInfo["id"];
+                        tag.Label = (string)readInfo["label"];
+                        tag.Color = (string)readInfo["color"];
+
+                        tags.Add(tag);
                     }
                 }
 
-                return tagId;
+                return tags;
             }
             catch (Exception ex)
             {
@@ -176,11 +143,11 @@ namespace FinalGroupProject.SQLRepository
 
 
 
-                            List<int> tagId = SubQuery(comment.Id);
+                            List<Tag> tags = SubQuery(comment.Id);
 
 
 
-                            comment.TagId = tagId;
+                            comment.Tag = tags;
 
                             comments.Add(comment);
                             counter--;
