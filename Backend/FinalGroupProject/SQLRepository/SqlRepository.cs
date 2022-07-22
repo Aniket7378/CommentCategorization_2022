@@ -16,6 +16,43 @@ namespace FinalGroupProject.SQLRepository
     {
         public ISqlDbConnection DatabaseConnection { get; set; }
 
+        public List<Tag> GetTags()
+        {
+            List<Tag> tags = new List<Tag>();
+            try
+            {
+                string query = @"select * from tag";
+
+                DatabaseConnection.Open();
+
+                using (SqlCommand sqlCommand = new SqlCommand(query))
+                {
+                    sqlCommand.Connection = DatabaseConnection.SqlConnectionToDb;
+
+                    SqlDataReader readAllInfo = sqlCommand.ExecuteReader();
+
+                    while (readAllInfo.Read())
+                    {
+                        Tag tag = new Tag();
+
+                        tag.Id = (int)readAllInfo["id"];
+                        tag.Label = (string)readAllInfo["label"];
+                        tag.Color = (string)readAllInfo["color"];
+                        
+
+                        tags.Add(tag);
+                    }
+                    readAllInfo.Close();
+                }
+                DatabaseConnection.Close();
+                return tags;
+            }
+            catch (Exception ex)
+            {
+                DatabaseConnection.Close();
+                throw ex;
+            }
+        }
 
         public List<LabelCount> GetLabelCount()
         {
@@ -114,7 +151,7 @@ namespace FinalGroupProject.SQLRepository
                     }
                     else
                     {
-                        query = query + $" and tag.id in ({label}) group by comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.id" + order;
+                        query = query + $" and tag.label in ({label}) group by comment.id,comment.name,comment.comment_date,comment.city,comment.user_comment,tag.id" + order;
                     }
                     
 
@@ -125,7 +162,12 @@ namespace FinalGroupProject.SQLRepository
                         SqlDataReader readAllInfo = sqlCommand.ExecuteReader();
 
                         int previous = 0;
+                        bool hasRows = readAllInfo.HasRows;
 
+                        if (!hasRows)
+                        {
+                            isTrue = false;
+                        }
                         while (readAllInfo.Read() && counter > 0)
                         {
                             CommentTag comment = new CommentTag();

@@ -13,6 +13,12 @@ namespace FinalGroupProject.SQLRepository
         /// </summary>
         ISqlDbConnection DatabaseConnection { get; set; }
 
+
+        /// <summary>
+        ///  Returns all the details of tag like id, label and color for each tag.
+        /// </summary>
+        /// <returns>Details of tag.</returns>
+        List<Tag> GetTags();
         /// <summary>
         ///  Returns all the details of tag like id, label, color and count for each tag.
         /// </summary>

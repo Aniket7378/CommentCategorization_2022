@@ -33,7 +33,7 @@ namespace FinalGroupProject
 
             try
             {
-                string orderBy = "", checkBox = "", comment = "", name = "", city = "", label = "",tempLabel = "",skip = "0", top = "1";
+                string orderBy = "", checkBox = "", comment = "", name = "", city = "", label = "",tempLabel = "",skip = "0", top = "100";
                 int count = 0;
 
                 if (req.Query.ContainsKey("order"))
