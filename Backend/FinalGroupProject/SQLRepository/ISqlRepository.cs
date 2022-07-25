@@ -65,5 +65,7 @@ namespace FinalGroupProject.SQLRepository
         /// <param name="commentTag"></param>
         void PostCommentTagMapping(CommentTagMapping commentTag);
 
+        void DeleteCommentTag(CommentTagMapping commentTag);
+
     }
 }
