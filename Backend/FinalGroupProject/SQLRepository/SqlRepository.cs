@@ -353,6 +353,35 @@ namespace FinalGroupProject.SQLRepository
                 throw ex;
             }
         }
+        
+        public void DeleteCommentTag(CommentTagMapping commentTag)
+        {
+            DatabaseConnection.Open();
+            SqlTransaction sqlTransaction = DatabaseConnection.SqlConnectionToDb.BeginTransaction();
+            try
+            {
+                using (SqlCommand sqlCommand = new SqlCommand())
+                {
+                    sqlCommand.Transaction = sqlTransaction;
 
+                    sqlCommand.Connection = DatabaseConnection.SqlConnectionToDb;
+
+                    sqlCommand.CommandText = string.Empty;
+                    sqlCommand.CommandText = $"delete from commentTag_mapping where comment_id = '{commentTag.CommentId}' and tag_id = '{commentTag.TagId}'";
+
+                    sqlCommand.ExecuteNonQuery();
+
+                    sqlTransaction.Commit();
+                }
+                DatabaseConnection.Close();
+            }
+
+            catch (Exception ex)
+            {
+                DatabaseConnection.Close();
+                sqlTransaction.Rollback();
+                throw ex;
+            }
+        }
     }
 }
