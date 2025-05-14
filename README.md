@@ -6,7 +6,7 @@ Welcome to **CommentCategorization** – an intelligent comment categorization s
 
 ## 🚀 Overview
 
-CommentSense processes and analyzes large volumes of feedback based on various criteria such as content, city, location, date, and interests using structured tags. It helps businesses extract actionable insights from raw comment data.
+CommentCategorization processes and analyzes large volumes of feedback based on various criteria such as content, city, location, date, and interests using structured tags. It helps businesses extract actionable insights from raw comment data.
 
 ---
 
